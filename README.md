@@ -1,295 +1,317 @@
-# PDS Template Repository for Python
+# trk234
+Python reader library and example usage scripts for the Deep Space Network's TRK 2-34 Tracking and Navigation Files (TNF) data format. This library is fully compliant with Revision N of the TRK-2-34 format, but is also valid for revisions beyond it. [^1]
 
-This is the template repository for PDS's Python projects.
+These utilities were produced by the Planetary Radar and Radio Sciences Group (332K) at the Jet Propulsion Laboratory, California Institute of Technology.
 
-This repository aims at being a base for new python repositories used in PDS. It guides developers to ease the initialization of a project and recommends preferred options to standardize developments and ease maintenance. Simply click the <kbd>Use this template</kbd> button ↑ (or use [this hyperlink](https://github.com/NASA-PDS/pds-template-repo-python/generate)).
+## Data Overview
 
+To use this library one must first understand the organization and structure of the TRK-2-34 data format [^1], **it is highly recommended to read the Software Interface Specification document [^1] before continuing**.
 
-## 🏃 Getting Started With This Template
+TNFs are the most primitive (and most voluminous) product of the closed-loop tracking system at the Deep Space Network. TRK 2-34 files are TNFs, and as such, may be referred to as either TNFs or TRK 2-34 depending on the user’s preference. Each TRK 2-34 file is produced in near-real time (NERT) as the spacecraft is being actively tracked by a given DSN station. SFDUs are ordered in the TRK 2-34 files in time-ascending order by the DSN.
 
-See our wiki page for more info on setting up your new repo. You can remove this section once you have completed the necessary start-up steps.
+TRK 2-34 files are binary files in Standard Formatted Data Unit (SFDU) format. There are 18 distinct types of SFDUs organized into five groups. 
 
-https://github.com/NASA-PDS/nasa-pds.github.io/wiki/Git-and-Github-Guide#creating-a-new-repo
+| Number | Data Class   | Description                       | SFDU Length (bytes) |
+|--------|--------------|-----------------------------------|---------------------|
+|      0 | Uplink       | Uplink Carrier Phase              | 162                 |
+|      1 | Downlink     | Downlink Carrier Phase            | 358                 |
+|      2 | Uplink       | Uplink Sequential Ranging Phase   | 194                 |
+|      3 | Downlink     | Downlink Sequential Ranging Phase | 304                 |
+|      4 | Uplink       | Uplink PN Ranging Phase           | 276                 |
+|      5 | Downlink     | Downlink PN Ranging Phase         | 388                 |
+|      6 | Derived      | Doppler Count                     | 200                 |
+|      7 | Derived      | Sequential Range                  | 330                 |
+|      8 | Derived      | Angles                            | 178                 |
+|      9 | Derived      | Ramp Frequency                    | 124                 |
+|     10 | Inferometric | VLBI                              | 204                 |
+|     11 | Derived      | DRVID                             | 182                 |
+|     12 | Filtered     | Smoothed Noise                    | 164                 |
+|     13 | Filtered     | Allan Deviation                   | 160                 |
+|     14 | Derived      | PN Range                          | 348                 |
+|     15 | Derived      | Tone Range                        | 194                 |
+|     16 | Derived      | Carrier Frequency Observable      | 182 + 18n           |
+|     17 | Derived      | Total Count Phase Observable      | 194 + 22n           |
 
-**👉 Important!** You must assign the teams as mentioned on the wiki page above! At a minimum, these are:
+## Installation
 
-| Team                                | Permission |
-| ----------------------------------- | ---------- |
-| `@NASA-PDS/pds-software-committers` | `write`    |
-| `@NASA-PDS/pds-software-pmc`        | `admin`    |
-| `@NASA-PDS/pds-operations`          | `admin`    |
+This is a Python library package with scripts and configuration files.
 
----
+The library  can be installed by cloning the repository to your local machine and running:
 
-# My Project
+```
+pip install \path\to\trk234
+```
 
-This is the XYZ that does this, that, and the other thing for the Planetary Data System.
-
-Please visit our website at: https://nasa-pds.github.io/pds-my-project
-
-It has useful information for developers and end-users.
-
-## Prerequisites
-
-Include any system-wide requirements (`brew install`, `apt-get install`, `yum install`, …) **Python 3** should be used regardless as [Python 2 reached end-of-life on January 1st, 2020](https://pythonclock.org/).
-
-
-## User Quickstart
-
-Install with:
-
-    pip install my_pds_module
-
-If possible, make it so that your program works out of the box without any additional configuration—but see the [Configuration](###configuration) section for details.
-
-To execute, run:
-
-    (put your run commands here)
-
-
-## Code of Conduct
-
-All users and developers of the NASA-PDS software are expected to abide by our [Code of Conduct](https://github.com/NASA-PDS/.github/blob/main/CODE_OF_CONDUCT.md). Please read this to ensure you understand the expectations of our community.
-
-
-## Development
-
-To develop this project, use your favorite text editor, or an integrated development environment with Python support, such as [PyCharm](https://www.jetbrains.com/pycharm/).
-
-
-### Contributing
-
-For information on how to contribute to NASA-PDS codebases please take a look at our [Contributing guidelines](https://github.com/NASA-PDS/.github/blob/main/CONTRIBUTING.md).
-
-
-### Installation
-
-Install in editable mode and with extra developer dependencies into your virtual environment of choice:
-
-    pip install --editable '.[dev]'
-
-Make a baseline for any secrets (email addresses, passwords, API keys, etc.) in the repository:
-
-    detect-secrets scan . \
-        --all-files \
-        --disable-plugin AbsolutePathDetectorExperimental \
-        --exclude-files '\.secrets..*' \
-        --exclude-files '\.git.*' \
-        --exclude-files '\.mypy_cache' \
-        --exclude-files '\.pytest_cache' \
-        --exclude-files '\.tox' \
-        --exclude-files '\.venv' \
-        --exclude-files 'venv' \
-        --exclude-files 'dist' \
-        --exclude-files 'build' \
-        --exclude-files '.*\.egg-info' > .secrets.baseline
-
-Review the secrets to determine which should be allowed and which are false positives:
-
-    detect-secrets audit .secrets.baseline
-
-Please remove any secrets that should not be seen by the public. You can then add the baseline file to the commit:
-
-    git add .secrets.baseline
-
-Then, configure the `pre-commit` hooks:
-
-    pre-commit install
-    pre-commit install -t pre-push
-    pre-commit install -t prepare-commit-msg
-    pre-commit install -t commit-msg
-
-These hooks then will check for any future commits that might contain secrets. They also check code formatting, PEP8 compliance, type hints, etc.
-
-👉 **Note:** A one time setup is required both to support `detect-secrets` and in your global Git configuration. See [the wiki entry on Secrets](https://github.com/NASA-PDS/nasa-pds.github.io/wiki/Git-and-Github-Guide#detect-secrets) to learn how.
-
-
-### Packaging
-
-To isolate and be able to re-produce the environment for this package, you should use a [Python Virtual Environment](https://docs.python.org/3/tutorial/venv.html). To do so, run:
-
-    python -m venv venv
-
-Then exclusively use `venv/bin/python`, `venv/bin/pip`, etc.
-
-If you have `tox` installed and would like it to create your environment and install dependencies for you run:
-
-    tox --devenv <name you'd like for env> -e dev
-
-Dependencies for development are specified as the `dev` `extras_require` in `setup.cfg`; they are installed into the virtual environment as follows:
-
-    pip install --editable '.[dev]'
-
-All the source code is in a sub-directory under `src`.
-
-You should update the `setup.cfg` file with:
-
-- name of your module
-- license, default apache, update if needed
-- description
-- download url, when you release your package on github add the url here
-- keywords
-- classifiers
-- install_requires, add the dependencies of you package
-- extras_require, add the development Dependencies of your package
-- entry_points, when your package can be called in command line, this helps to deploy command lines entry points pointing to scripts in your package
-
-For the packaging details, see https://packaging.python.org/tutorials/packaging-projects/ as a reference.
-
+Note the installation path. Add files from the `scripts/` directory to your execution path, and if using the `bin/` execution scripts, update the paths in the scripts appropriately.
 
 ### Configuration
 
-It is convenient to use ConfigParser package to manage configuration. It allows a default configuration which can be overwritten by the user in a specific file in their environment. See https://pymotw.com/2/ConfigParser/
+For users with complicated Python environments or wish to simplify the installation, several `bash` scripts are provided in the `bin/` directory. In each of the files, edit the statement to point to the correct directory the library is installed:
 
-For example:
-
-    candidates = ['my_pds_module.ini', 'my_pds_module.ini.default']
-    found = parser.read(candidates)
-
-
-### Logs
-
-You should not use `print()`vin the purpose of logging information on the execution of your code. Depending on where the code runs these information could be redirected to specific log files.
-
-To make that work, start each Python file with:
-
-```python
-"""My module."""
-import logging
-
-logger = logging.getLogger(__name__)
+```
+# update pythonpath for the correct libraries
+export PYTHONPATH=$PYTHONPATH:/home/source/trk234
 ```
 
-To log a message:
+Also update the location of the scripts:
+```
+# add the path of the script install directory
+SCRIPTDIR=/home/source/trk234/scripts
+```
 
-    logger.info("my message")
+## Library Architecture
 
-In your `main` routine, include:
+A `Reader` class reads the TRK-2-34 file; from there, the file can be decoded and contents accessed through the `SFDU` class. One attribute in the `Reader` class is `sfdu_list`, which contains a list of `SFDU` classes. Each `SFDU` class contains
+* `SFDU.label`: SFDU Label
+* `SFDU.agg_chdo`: Aggregation CHDO
+* `SFDU.pri_chdo`: Primary CHDO
+* `SFDU.sec_chdo`: Secondary CHDO
+* `SFDU.trk_chdo`: Tracking Data CHDO
 
-    logging.basicConfig(level=logging.INFO)
+Individual attributes from each of these, as documented in Column 2 of the data tables in the TRK-2-34 Software Interface Specification document [^1], contain the data.
 
-to get a basic logging system configured.
+### Examples
+#### Example: Basic file decoding
+
+The module reads and parses the SFDUs in a given TRK 2-34 binary file. To read a file, the basic syntax is:
+```
+import trk234
+
+f = trk234.Reader('filename.tnf')
+f.decode()
+
+sfdus = f.sfdu_list
+```
+
+This will read the raw binary data and determine the SFDU breaking points, then parse it into a list of SFDUs. If you are dealing with a large file, and only need to decode certain parts of the SFDU, optionally place one of the following keyword arguments into the decode() function:
+
+* `decode( label=False )` - Don't decode the label
+* `decode( agg_chdo=False )` - Don't decode the Aggregation CHDO
+* `decode( pri_chdo=False )` - Don't decode the Primary CHDO
+* `decode( sec_chdo=False )` - Don't decode the Secondary CHDO
+* `decode( trk_chdo=False )` - Don't decode the Tracking CHDO
+
+If you disable the decoding of the label, you can't decode anything else (not recommended). If you disable decoding of the Primary CHDO, you can't decode the Tracking CHDO.
+
+For example, it may be worth it to disable the Secondary CHDO and Tracking CHDO if you only need to know what data types are in the file, e.g.:
+```
+f.decode( sec_chdo=False, trk_chdo=False )
+```
+#### Example: Print Attribute
+```
+import trk234
+
+f = trk234.Reader('15025s026.stdf')
+f.decode()
+for s in f.sfdu_list:
+    print( s.pri_chdo.format_code )
+```
+
+#### Example: Get info on a file
+```
+import trk234
+
+f = trk234.Reader('15025s026.stdf')
+f.decode(trk_chdo=False) # Setting trk_chdo to false will not decode the Tracking CHDO, speeding processing time
+info = trk234.Info( f )
+print( info )
+```
+
+#### Dumping to ASCII
+Warning: this might produce very large about of text, depending on the size of the data file.
+```
+import trk234
+
+f = trk234.Reader('15025s026.stdf')
+f.decode()
+for s in f.sfdu_list:
+    print( s )
+```
+
+#### Accessing attributes
+
+Attributes are accessed from the respective CHDO. The qttribute names are idential to the "identifier" as specified in the TRK 2-34 documentation.
+
+```
+import trk234
+
+f = trk234.Reader('15025s026.stdf')
+f.decode()
+
+time = []
+sky_frequency = []
+signal_power = []
+for s in f.sfdu_list:
+    if s.pri_chdo.format_code == 1:
+        time.append( s.timestamp() )
+        sky_frequency.append( s.trk_chdo.dl_freq )
+        signal_power.append( s.trk_chdo.pcn0 )
+```
+
+## Script Usage
+
+### Read Downlink Information
+
+Reads downlink information (sky frequency, system noise temperature, carrier signal-to-noise ratio, loop bandwidth) and prints to the terminal. Optionally filter by DSN station number, downlink band, and/or tracking mode.
+
+Usage: `trk234_dnlink.py [-h] [-l] [-d DSS] [-b BAND] [-m MODE] [-t] [-c] Input`
+
+Basic Example: *print to a text file*
+```
+trk234_dnlink.py GRV_JUGR_2016240_0635X55MC001V01.TNF > downlink.txt
+```
+
+### Dump Contents to ASCII
+
+Reads the TRK-2-34 data file, prints every attribute from each SFDU in a pseudo-JSON like format. Warning: this might produce very large about of text, depending on the size of the data file. Restrict the size of the dump with the options for maximum number and data type.
+
+Usage: `trk234_dump.py [-h] [-f FORMAT_CODE] [-m MAX] Input`
+
+Basic Example: *dump to text file*
+```
+trk234_dump.py GRV_JUGR_2016240_0635X55MC001V01.TNF > dump.txt
+```
+
+Complex Example: *dump only the first SFDU of carrier observable data type*
+```
+trk234_dump.py -m 1 -f 16 GRV_JUGR_2016240_0635X55MC001V01.TNF
+```
+
+### Extract an Individual Attribute
+
+Reads the TRK-2-34 file, and prints the time history of a user-specified attribute from the TRK-2-34 documentation [^1]. Must provide the name of the attribute, and which part of the SFDU it is from (SFDU Label, Aggregation CHDO, Primary CHDO, Secondary CHDO or Tracking CHDO)
+
+Usage: `trk234_extract [-h] [-f FORMAT_CODE] [-p] [-t] [-i IDENTIFIER] [--label] [--agg] [--pri] [--sec] [--trk] Input`
+Required Options: one of `--label`, `--agg`, `--pri`, `--sec`, `--trk`, and `-i IDENTIFIER`
+
+Example: *extract the spacecraft ID from all SFDUs*
+```
+trk234_extract.py --sec -i scft_id GRV_JUGR_2016240_0635X55MC001V01.TNF > scft_id.txt
+```
+
+### Print Information from File
+
+Read a TRK-2-34 file and parse high-level information about the file, and print it to the terminal.
+
+Usage: `trk234_info.py [-h] [-p] [-m] [-q] Input`
+
+Example:
+```
+trk234_info2.py GRV_JUGR_2016240_0635X55MC001V01.TNF
+```
+
+Example Output:
+```
+         Report for File: GRV_JUGR_2016240_0635X55MC001V01.TNF
+         Generation Date: 2023-268T22:22:36
+              Start Time: 2016-240T06:35:48
+                End Time: 2016-240T19:50:00
+           Spacecraft ID: 61
+         Downlink DSS ID: 55
+          Downlink Bands: X, Ka
+      Doppler Count Time: 1.0
+           Uplink DSS ID: 55
+            Uplink Bands: X
+           Tracking Mode: 2W, None, 3W/43, 1W
+       Number of Records: 283594
+    Data Description IDs: C125, C123, C124
+    Available Data Types: 0, 1, 2, 3, 7, 9, 11, 16, 17
+                      00: Uplink Carrier Phase - 47596
+                      01: Downlink Carrier Phase - 66247
+                      02: Uplink Sequential Ranging Phase - 36570
+                      03: Downlink Sequential Ranging Phase - 113
+                      07: Sequential Ranging - 113
+                      09: Ramps - 366
+                      11: DRVID - 113
+                      16: Carrier Observable - 66238
+                      17: Total Phase Observable - 66238
+```
+
+### Purify/Filter a TRK-2-34 to SIS Compliance
+
+Remove non-compliant SFDUs from a TRK-2-34 file and optionally filter the data file by downlink band, uplink band, and DSN station number.
+
+**This is one of the required steps in labeling a TRK-2-34 file**
+
+Usage: `trk234_purify [-h] [-v] [-p] [-b DL_BAND] [-a UL_BAND] [-d DL_DSS_ID] [-u UL_DSS_ID] [-f FORMAT_CODE] Input Output`
+
+Example: *purify a TRK-2-34 file, removing the non-compliant CHDOs resulting from DSN marking some as bad*
+```
+trk234_purify.py 232511615SC61DSS35_noHdr.234 232511615SC61DSS35_noHdr.234.pure
+```
+
+Bulk Processing Example: *do this purification on a large number of data files*
+```
+find *234 -exec trk234_purify.py  {} {}.pure \; >> logfile.txt
+```
+
+### Read Uplink Information
+
+Read the uplink ramp history from a TRK-2-34 file and print it out. The data printed is the ramp frequency and ramp rate.
+
+Usage: `trk234_ramp.py [-h] [-d DSS] [-b BAND] [-t] Input`
+
+Example: *print X-band ramps from DSS-55*
+```
+trk234_ramp.py -b X -d 55 GRV_JUGR_2016240_0635X55MC001V01.TNF > ramp_X_55.txt
+```
+
+### Sort a TRK-2-34 File by Data Type
+
+Sort (regroup) a TRK-2-34 file by data type (aka format code) into ascending order. This will make the TRK-2-34 file easier to label for PDS, but the SFDUs will no longer be in time-increasing order.
+
+**This is one of the required steps in labeling a TRK-2-34 file**
+
+Usage: `trk234_regroup.py [-h] [-v] [-p] [--validate] Input Output`
+
+Example:
+```
+trk234_regroup.py 232511615SC61DSS35_noHdr.234.pure 232511615SC61DSS35_noHdr.234.pure.sorted
+```
+
+Bulk Processing Example: *do this sorting on a large number of data files*
+```
+find *234.pure -exec trk234_regroup.py  {} {}.sorted \; >> logfile.txt
+```
+
+# Disclaimer Statement
+Copyright (c) 2023, California Institute of Technology ("Caltech").
+U.S. Government sponsorship acknowledged. Any commercial use must be 
+negotiated with the Office of Technology Transfer at the California 
+Institute of Technology.
+ 
+This software may be subject to U.S. export control laws. By accepting this 
+software, the user agrees to comply with all applicable U.S. export laws 
+and regulations. User has the responsibility to obtain export licenses, or 
+other export authority as may be required before exporting such information 
+to foreign countries or providing access to foreign persons.
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice,
+  this list of conditions and the following disclaimer.
+* Redistributions must reproduce the above copyright notice, this list of
+  conditions and the following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+* Neither the name of Caltech nor its operating division, the Jet Propulsion
+  Laboratory, nor the names of its contributors may be used to endorse or
+  promote products derived from this software without specific prior written
+  permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 
 
-### Tooling
-
-The `dev` `extras_require` included in the template repo installs `black`, `flake8` (plus some plugins), and `mypy` along with default configuration for all of them. You can run all of these (and more!) with:
-
-    tox -e lint
-
-
-### Code Style
-
-So that your code is readable, you should comply with the [PEP8 style guide](https://www.python.org/dev/peps/pep-0008/). Our code style is automatically enforced in via [black](https://pypi.org/project/black/) and [flake8](https://flake8.pycqa.org/en/latest/). See the [Tooling section](#-tooling) for information on invoking the linting pipeline.
-
-❗Important note for template users❗
-The included [pre-commit configuration file](.pre-commit-config.yaml) executes `flake8` (along with `mypy`) across the entire `src` folder and not only on changed files. If you're converting a pre-existing code base over to this template that may result in a lot of errors that you aren't ready to deal with.
-
-You can instead execute `flake8` only over a diff of the current changes being made by modifying the `pre-commit` `entry` line:
-
-    entry: git diff -u | flake8 --diff
-
-Or you can change the `pre-commit` config so `flake8` is only called on changed files which match a certain filtering criteria:
-
-    -   repo: local
-        hooks:
-        -   id: flake8
-            name: flake8
-            entry: flake8
-            files: ^src/|tests/
-            language: system
-
-
-### Recommended Libraries
-
-Python offers a large variety of libraries. In PDS scope, for the most current usage we should use:
-
-| Library      | Usage                                           |
-|--------------|------------------------------------------------ |
-| configparser | manage and parse configuration files            |
-| argparse     | command line argument documentation and parsing |
-| requests     | interact with web APIs                          |
-| lxml         | read/write XML files                            |
-| json         | read/write JSON files                           |
-| pyyaml       | read/write YAML files                           |
-| pystache     | generate files from templates                   |
-
-Some of these are built into Python 3; others are open source add-ons you can include in your `requirements.txt`.
-
-
-### Tests
-
-This section describes testing for your package.
-
-A complete "build" including test execution, linting (`mypy`, `black`, `flake8`, etc.), and documentation build is executed via:
-
-    tox
-
-
-#### Unit tests
-
-Your project should have built-in unit tests, functional, validation, acceptance, etc., tests.
-
-For unit testing, check out the [unittest](https://docs.python.org/3/library/unittest.html) module, built into Python 3.
-
-Tests objects should be in packages `test` modules or preferably in project 'tests' directory which mirrors the project package structure.
-
-Our unit tests are launched with command:
-
-    pytest
-
-If you want your tests to run automatically as you make changes start up `pytest` in watch mode with:
-
-    ptw
-
-
-#### Integration/Behavioral Tests
-
-One should use the `behave package` and push the test results to "testrail".
-
-See an example in https://github.com/NASA-PDS/pds-doi-service#behavioral-testing-for-integration--testing
-
-
-### Documentation
-
-Your project should use [Sphinx](https://www.sphinx-doc.org/en/master/) to build its documentation. PDS' documentation template is already configured as part of the default build. You can build your projects docs with:
-
-    python setup.py build_sphinx
-
-You can access the build files in the following directory relative to the project root:
-
-    build/sphinx/html/
-
-
-## Build
-
-    pip install wheel
-    python setup.py sdist bdist_wheel
-
-
-## Publication
-
-NASA PDS packages can publish automatically using the [Roundup Action](https://github.com/NASA-PDS/roundup-action), which leverages GitHub Actions to perform automated continuous integration and continuous delivery. A default workflow that includes the Roundup is provided in the `.github/workflows/unstable-cicd.yaml` file. (Unstable here means an interim release.)
-
-
-### Manual Publication
-
-Create the package:
-
-    python setup.py bdist_wheel
-
-Publish it as a Github release.
-
-Publish on PyPI (you need a PyPI account and configure `$HOME/.pypirc`):
-
-    pip install twine
-    twine upload dist/*
-
-Or publish on the Test PyPI (you need a Test PyPI account and configure `$HOME/.pypirc`):
-
-    pip install twine
-    twine upload --repository testpypi dist/*
-
-## CI/CD
-
-The template repository comes with our two "standard" CI/CD workflows, `stable-cicd` and `unstable-cicd`. The unstable build runs on any push to `main` (± ignoring changes to specific files) and the stable build runs on push of a release branch of the form `release/<release version>`. Both of these make use of our GitHub actions build step, [Roundup](https://github.com/NASA-PDS/roundup-action). The `unstable-cicd` will generate (and constantly update) a SNAPSHOT release. If you haven't done a formal software release you will end up with a `v0.0.0-SNAPSHOT` release (see NASA-PDS/roundup-action#56 for specifics).
+[^1]: https://pds-geosciences.wustl.edu/radiosciencedocs/urn-nasa-pds-radiosci_documentation/dsn_trk-2-34/
