@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 # Copyright (c) 2023, California Institute of Technology ("Caltech").
 # U.S. Government sponsorship acknowledged. Any commercial use must be 
 # negotiated with the Office of Technology Transfer at the California 
@@ -36,17 +36,50 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-# Setup file for trk234 library
-#
+"""
+TRK234: A module to read TRK 2-34 files
 
-from distutils.core import setup
+progress display file. Creates a simple display on the stderr output showing
+the progress of a loop.
 
-setup(name='TRK-2-34',
-      version='1.0',
-      description='DSN TRK 2-34 Reader Library for Python',
-      author='Dustin Buccino',
-      author_email='Dustin.R.Buccino@jpl.nasa.gov',
-      url='https://github.com/NASA-PDS/PyTrk234',
-      packages=['trk234' ],
-     )
+Author: Dustin Buccino
+Email: dustin.r.buccino@jpl.nasa.gov
+Affiliation: Planetary Radar and Radio Sciences, Group 332K
+             Jet Propulsion Laboratory, California Institute of Technology
+Date Created: 23-SEP-2015
+Last Modified: 14-SEP-2023
+
+"""
+
+import sys
+
+# ---------------------------------------------------------------------------
+class ProgressDisplay:
+   """
+      Progress display (for decoding the SFDU). Example usage:
+
+      p = ProgressDisplay()
+      for i in range(0,20):
+         p.update(i/20.0)
+      p.kill()
+   """
+
+   def __init__(self, maxIndex, npts=30, char='*'):
+      """ class constructor """
+      self.n = float(maxIndex)
+      self.npts = npts
+      self.char = char
+      self.prev = 0
+      sys.stderr.write(' '*8 + '0%' + ' '*(npts-6) +'100%\n' + ' '*8)
+
+   def update(self, i):
+      """ update the increment in the loop """
+      new  = int( i/self.n * self.npts )
+      if new > self.prev:
+        sys.stderr.write( self.char )
+      self.prev = new
+
+   def kill(self):
+      sys.stderr.write( '\n' )
+      
+# ---------------------------------------------------------------------------

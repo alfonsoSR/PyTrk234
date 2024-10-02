@@ -36,17 +36,71 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-# Setup file for trk234 library
-#
+"""
+TRK234: A module to read TRK 2-34 files
 
-from distutils.core import setup
+utilities file. Contains useful id mappings and functions that help when
+processing and using TRK 2-34 files.
 
-setup(name='TRK-2-34',
-      version='1.0',
-      description='DSN TRK 2-34 Reader Library for Python',
-      author='Dustin Buccino',
-      author_email='Dustin.R.Buccino@jpl.nasa.gov',
-      url='https://github.com/NASA-PDS/PyTrk234',
-      packages=['trk234' ],
-     )
+Author: Dustin Buccino
+Email: dustin.r.buccino@jpl.nasa.gov
+Affiliation: Planetary Radar and Radio Sciences, Group 332K
+             Jet Propulsion Laboratory, California Institute of Technology
+Date Created: 23-SEP-2015
+Last Modified: 14-SEP-2023
+
+"""
+
+# dict to decode the data description field
+data_descriptions = {
+   'C123' : 'Uplink types',
+   'C124' : 'Downlink types',
+   'C125' : 'Derived types',
+   'C126' : 'Inferometric types',
+   'C127' : 'Filtered types',
+}
+
+# dict to decode the format code
+format_codes = {
+    0 : 'Uplink Carrier Phase',
+    1 : 'Downlink Carrier Phase',
+    2 : 'Uplink Sequential Ranging Phase',
+    3 : 'Downlink Sequential Ranging Phase',
+    4 : 'Uplink PN Ranging Phase',
+    5 : 'Downlink PN Ranging Phase',
+    6 : 'Doppler',
+    7 : 'Sequential Ranging',
+    8 : 'Angles',
+    9 : 'Ramps',
+   10 : 'VLBI',
+   11 : 'DRVID',
+   12 : 'Smoothed Noise',
+   13 : 'Allan Deviation',
+   14 : 'PN Ranging',
+   15 : 'Tone Ranging',
+   16 : 'Carrier Observable',
+   17 : 'Total Phase Observable',
+}
+
+# dict to decode the band
+bands = {
+   0 : 'Unknown',
+   1 : 'S',
+   2 : 'X',
+   3 : 'Ka',
+   4 : 'Ku',
+   5 : 'L',
+}
+
+# ---------------------------------------------------------------------------
+def types(sfdu_list):
+   """ return the number of each type of SFDU (0-17) """
+
+   # Loop through each type and determine the number
+   n = []
+   for i in range(0,18):
+      n.append( len([ s for s in sfdu_list if s.pri_chdo.format_code == i ]) )
+   
+   # return a list whose index corresponds to the data type
+   return n
+# ---------------------------------------------------------------------------
